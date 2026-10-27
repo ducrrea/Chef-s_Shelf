@@ -83,7 +83,7 @@ class _RecipeDetailViewState extends State<RecipeDetailView> {
                 height: 220,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (context, error, stackTrace) => Container(
                   height: 220,
                   color: Colors.grey.shade300,
                   child: const Icon(Icons.broken_image, size: 50),

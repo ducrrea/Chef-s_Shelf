@@ -1,18 +1,12 @@
-import 'package:chefs_shelf/models/recipe_model.dart';
-import 'package:chefs_shelf/services/api_service.dart' hide RecipeModel;
-import 'package:chefs_shelf/services/auth_service.dart';
-import 'package:chefs_shelf/services/firestore_service.dart';
-import 'package:chefs_shelf/views/recipe_detail_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:chefs_shelf/models/recipe_model.dart';
 import 'package:chefs_shelf/services/api_service.dart';
 import 'package:chefs_shelf/services/auth_service.dart';
 import 'package:chefs_shelf/services/firestore_service.dart';
-import 'package:chefs_shelf/widgets/recipe_card.dart';
+import 'package:chefs_shelf/views/recipe_detail_view.dart';
 import 'package:chefs_shelf/widgets/empty_state.dart';
-
-
+import 'package:chefs_shelf/widgets/recipe_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -22,17 +16,20 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  // Controladores e serviços
   final TextEditingController _searchController = TextEditingController();
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
 
+  // Variáveis de estado para controle da interface
   List<RecipeModel> _searchResults = [];
   bool _isSearching = false;
   String _errorMessage = '';
 
+  /// Função responsável por buscar receitas na API externa
   void _onSearch() async {
-    final query = _searchController.text;
-    if (query.trim().isEmpty) return;
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
 
     setState(() {
       _isSearching = true;
@@ -41,6 +38,10 @@ class _HomeViewState extends State<HomeView> {
 
     try {
       final results = await ApiService.searchRecipes(query);
+
+      // Garante que a tela ainda está ativa antes de atualizar o estado
+      if (!mounted) return;
+
       setState(() {
         _searchResults = results;
         if (results.isEmpty) {
@@ -48,12 +49,22 @@ class _HomeViewState extends State<HomeView> {
         }
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Erro ao buscar receitas: $e';
       });
     } finally {
-      setState(() => _isSearching = false);
+      if (mounted) {
+        setState(() => _isSearching = false);
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    // Libera a memória ocupada pelo controlador de texto ao fechar a tela
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -84,7 +95,9 @@ class _HomeViewState extends State<HomeView> {
         ),
         body: TabBarView(
           children: [
+            // ==========================================
             // ABA 1: BUSCA DE RECEITAS DA API
+            // ==========================================
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -95,7 +108,7 @@ class _HomeViewState extends State<HomeView> {
                         child: TextField(
                           controller: _searchController,
                           decoration: const InputDecoration(
-                            hintText: 'Digite um ingrediente ou prato (ex: chicken, pasta)...',
+                            hintText: 'Digite um ingrediente ou prato (ex: chicken)...',
                             border: OutlineInputBorder(),
                           ),
                           onSubmitted: (_) => _onSearch(),
@@ -115,39 +128,40 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   const SizedBox(height: 16),
                   if (_isSearching)
-                    const Center(child: CircularProgressIndicator())
+                    const Expanded(
+                      child: Center(child: CircularProgressIndicator()),
+                    )
                   else if (_errorMessage.isNotEmpty)
-                    Text(_errorMessage, style: const TextStyle(color: Colors.grey))
+                    Expanded(
+                      child: EmptyStateWidget(
+                        icon: Icons.search_off,
+                        message: _errorMessage,
+                      ),
+                    )
+                  else if (_searchResults.isEmpty)
+                    const Expanded(
+                      child: EmptyStateWidget(
+                        icon: Icons.soup_kitchen,
+                        message: 'Pesquise por um ingrediente acima para descobrir receitas deliciosas!',
+                      ),
+                    )
                   else
                     Expanded(
                       child: ListView.builder(
                         itemCount: _searchResults.length,
                         itemBuilder: (context, index) {
                           final recipe = _searchResults[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: ListTile(
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  recipe.imageUrl,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
+                          // Uso do Widget Reutilizável RecipeCard
+                          return RecipeCard(
+                            recipe: recipe,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RecipeDetailView(recipe: recipe),
                                 ),
-                              ),
-                              title: Text(recipe.title),
-                              subtitle: Text(recipe.category),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => RecipeDetailView(recipe: recipe),
-                                  ),
-                                );
-                              },
-                            ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -156,7 +170,9 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
+            // ==========================================
             // ABA 2: MINHAS RECEITAS SALVAS NO FIRESTORE
+            // ==========================================
             StreamBuilder<List<RecipeModel>>(
               stream: _firestoreService.getSavedRecipesStream(),
               builder: (context, snapshot) {
@@ -165,18 +181,18 @@ class _HomeViewState extends State<HomeView> {
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text('Erro ao carregar caderno: ${snapshot.error}'));
+                  return EmptyStateWidget(
+                    icon: Icons.error_outline,
+                    message: 'Erro ao carregar caderno: ${snapshot.error}',
+                  );
                 }
 
                 final savedRecipes = snapshot.data ?? [];
 
                 if (savedRecipes.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'Seu caderno está vazio.\nBusque e salve receitas na primeira aba!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
+                  return const EmptyStateWidget(
+                    icon: Icons.menu_book,
+                    message: 'Seu caderno está vazio.\nBusque e salve receitas na primeira aba!',
                   );
                 }
 
@@ -185,40 +201,28 @@ class _HomeViewState extends State<HomeView> {
                   itemCount: savedRecipes.length,
                   itemBuilder: (context, index) {
                     final recipe = savedRecipes[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            recipe.imageUrl,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        title: Text(recipe.title),
-                        subtitle: Text(recipe.category),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            await _firestoreService.deleteRecipe(recipe.id);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Receita removida!')),
-                              );
-                            }
-                          },
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => RecipeDetailView(recipe: recipe),
-                            ),
-                          );
+                    // Uso do Widget Reutilizável RecipeCard com botão de exclusão
+                    return RecipeCard(
+                      recipe: recipe,
+                      trailingIcon: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          await _firestoreService.deleteRecipe(recipe.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Receita removida!')),
+                            );
+                          }
                         },
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RecipeDetailView(recipe: recipe),
+                          ),
+                        );
+                      },
                     );
                   },
                 );

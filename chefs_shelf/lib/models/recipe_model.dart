@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-//aqui é onde vamos criar a parte que vai lidar com a API TheMealDB, que é onde vamos buscar as receitas
+// Modelo de dados que representa uma receita tanto da API TheMealDB quanto do Firestore
 class RecipeModel {
   final String id;
   final String title;
@@ -18,58 +16,87 @@ class RecipeModel {
     required this.ingredients,
   });
 
-  /// Converte o JSON vindo da API TheMealDB
-  factory RecipeModel.fromApiJson(Map<String, dynamic> json) {
-    String rawInstructions = json['strInstructions'] ?? '';
-    List<String> instructionsList = rawInstructions
+  /// Converte o texto corrido de instruções em uma lista de passos
+  static List<String> _parseInstructions(String? rawInstructions) {
+    if (rawInstructions == null || rawInstructions.trim().isEmpty) return [];
+    return rawInstructions
         .split(RegExp(r'\r\n|\n|\r'))
-        .where((step) => step.trim().isNotEmpty)
+        .map((step) => step.trim())
+        .where((step) => step.isNotEmpty)
         .toList();
+  }
 
-    List<Map<String, String>> ingredientsList = [];
+  /// Extrai a lista de ingredientes e medidas dos campos dinâmicos da API
+  static List<Map<String, String>> _parseIngredientsFromApi(Map<String, dynamic> json) {
+    final List<Map<String, String>> list = [];
     for (int i = 1; i <= 20; i++) {
-      String? ingredient = json['strIngredient$i'];
-      String? measure = json['strMeasure$i'];
-
-      if (ingredient != null && ingredient.trim().isNotEmpty) {
-        ingredientsList.add({
-          'name': ingredient.trim(),
+      final String? name = json['strIngredient$i'];
+      final String? measure = json['strMeasure$i'];
+      if (name != null && name.trim().isNotEmpty) {
+        list.add({
+          'name': name.trim(),
           'measure': measure?.trim() ?? '',
         });
       }
     }
+    return list;
+  }
 
+  /// Converte o JSON vindo da API TheMealDB
+  factory RecipeModel.fromApiJson(Map<String, dynamic> json) {
     return RecipeModel(
-      id: json['idMeal'] ?? '',
-      title: json['strMeal'] ?? '',
-      category: json['strCategory'] ?? '',
-      imageUrl: json['strMealThumb'] ?? '',
-      instructions: instructionsList,
-      ingredients: ingredientsList,
+      id: json['idMeal']?.toString() ?? '',
+      title: json['strMeal']?.toString() ?? '',
+      category: json['strCategory']?.toString() ?? '',
+      imageUrl: json['strMealThumb']?.toString() ?? '',
+      instructions: _parseInstructions(json['strInstructions']),
+      ingredients: _parseIngredientsFromApi(json),
     );
   }
 
-  //aqui é onde vamos criar a função que vai converter o modelo de receita para um mapa que pode ser salvo no Firestore
-  factory RecipeModel.fromFirestore(Map<String, dynamic> doc) {
-    List<dynamic> rawIngredients = doc['ingredients'] ?? [];
-    List<Map<String, String>> parsedIngredients = rawIngredients.map((item) {
+  /// Converte a lista de ingredientes armazenada no Firestore
+  static List<Map<String, String>> _parseFirestoreIngredients(dynamic raw) {
+    if (raw is! List) return [];
+    return raw.map<Map<String, String>>((item) {
+      if (item is Map) {
+        return {
+          'name': item['name']?.toString() ?? '',
+          'measure': item['measure']?.toString() ?? '',
+        };
+      }
+      final str = item.toString();
+      final parts = str.contains(': ') ? str.split(': ') : str.split(' - ');
       return {
-        'name': item['name']?.toString() ?? '',
-        'measure': item['measure']?.toString() ?? '',
+        'name': parts.first.trim(),
+        'measure': parts.length > 1 ? parts.sublist(1).join(' - ').trim() : '',
       };
     }).toList();
+  }
 
+  /// Converte as instruções armazenadas no Firestore (seja lista ou mapa)
+  static List<String> _parseFirestoreInstructions(dynamic raw) {
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toList();
+    }
+    if (raw is Map) {
+      return raw.values.map((e) => e.toString()).toList();
+    }
+    return [];
+  }
+
+  /// Cria o modelo a partir do documento do Firestore
+  factory RecipeModel.fromFirestore(Map<String, dynamic> doc) {
     return RecipeModel(
-      id: doc['idMeal'] ?? '',
-      title: doc['strMeal'] ?? '',
-      category: doc['strCategory'] ?? '',
-      imageUrl: doc['strMealThumb'] ?? '',
-      instructions: List<String>.from(doc['instructions'] ?? []),
-      ingredients: parsedIngredients,
+      id: doc['idMeal']?.toString() ?? '',
+      title: doc['strMeal']?.toString() ?? '',
+      category: doc['strCategory']?.toString() ?? '',
+      imageUrl: doc['strMealThumb']?.toString() ?? '',
+      instructions: _parseFirestoreInstructions(doc['instructions']),
+      ingredients: _parseFirestoreIngredients(doc['ingredients']),
     );
   }
 
-  //aqui é onde vamos criar a função que vai converter o modelo de receita para um mapa que pode ser salvo no Firestore
+  /// Serializa a receita para armazenamento no Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'idMeal': id,

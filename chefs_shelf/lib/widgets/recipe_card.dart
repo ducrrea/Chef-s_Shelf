@@ -2,7 +2,6 @@
 
 import 'package:chefs_shelf/models/recipe_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 //aqui vai ser onde vamos criar o widget que vai exibir a receita em um card, que vai ser usado na tela de busca e na tela de caderno
 class RecipeCard extends StatelessWidget {
