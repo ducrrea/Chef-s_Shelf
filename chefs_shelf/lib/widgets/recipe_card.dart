@@ -49,7 +49,7 @@ class RecipeCard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(recipe.category),
-        trailing: trailingIcon ?? const Icon(Icons.chevron_right, color: Colors.deepOrange),
+        trailing: trailingIcon ?? const Icon(Icons.chevron_right, color: Color.fromARGB(255, 196, 89, 56)),
         onTap: onTap,
       ),
     );

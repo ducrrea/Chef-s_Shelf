@@ -16,7 +16,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  // Controladores e serviços
+  //controllers e serviços necessários para a tela inicial
   final TextEditingController _searchController = TextEditingController();
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
@@ -39,7 +39,7 @@ class _HomeViewState extends State<HomeView> {
     try {
       final results = await ApiService.searchRecipes(query);
 
-      // Garante que a tela ainda está ativa antes de atualizar o estado
+      // aqui verificamos se o widget ainda está montado antes de atualizar o estado, para evitar erros se a tela for fechada durante a busca
       if (!mounted) return;
 
       setState(() {
@@ -95,9 +95,6 @@ class _HomeViewState extends State<HomeView> {
         ),
         body: TabBarView(
           children: [
-            // ==========================================
-            // ABA 1: BUSCA DE RECEITAS DA API
-            // ==========================================
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -170,9 +167,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
-            // ==========================================
-            // ABA 2: MINHAS RECEITAS SALVAS NO FIRESTORE
-            // ==========================================
             StreamBuilder<List<RecipeModel>>(
               stream: _firestoreService.getSavedRecipesStream(),
               builder: (context, snapshot) {

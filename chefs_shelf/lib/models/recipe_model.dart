@@ -1,4 +1,4 @@
-// Modelo de dados que representa uma receita tanto da API TheMealDB quanto do Firestore
+
 class RecipeModel {
   final String id;
   final String title;
@@ -16,7 +16,7 @@ class RecipeModel {
     required this.ingredients,
   });
 
-  /// Converte o texto corrido de instruções em uma lista de passos
+  //aqui converte a lista de instruções em uma string para armazenar no Firestore
   static List<String> _parseInstructions(String? rawInstructions) {
     if (rawInstructions == null || rawInstructions.trim().isEmpty) return [];
     return rawInstructions
@@ -26,7 +26,7 @@ class RecipeModel {
         .toList();
   }
 
-  /// Extrai a lista de ingredientes e medidas dos campos dinâmicos da API
+  //aqui converte a lista de ingredientes em uma lista de mapas para armazenar no Firestore
   static List<Map<String, String>> _parseIngredientsFromApi(Map<String, dynamic> json) {
     final List<Map<String, String>> list = [];
     for (int i = 1; i <= 20; i++) {
@@ -42,7 +42,7 @@ class RecipeModel {
     return list;
   }
 
-  /// Converte o JSON vindo da API TheMealDB
+  //aqui cria o modelo a partir do JSON da API TheMealDB
   factory RecipeModel.fromApiJson(Map<String, dynamic> json) {
     return RecipeModel(
       id: json['idMeal']?.toString() ?? '',
@@ -54,7 +54,7 @@ class RecipeModel {
     );
   }
 
-  /// Converte a lista de ingredientes armazenada no Firestore
+  //aqui cria o modelo a partir do documento do Firestore, lidando com diferentes formatos de dados
   static List<Map<String, String>> _parseFirestoreIngredients(dynamic raw) {
     if (raw is! List) return [];
     return raw.map<Map<String, String>>((item) {
@@ -73,7 +73,7 @@ class RecipeModel {
     }).toList();
   }
 
-  /// Converte as instruções armazenadas no Firestore (seja lista ou mapa)
+  //aqui cria o modelo a partir do documento do Firestore, lidando com diferentes formatos de dados
   static List<String> _parseFirestoreInstructions(dynamic raw) {
     if (raw is List) {
       return raw.map((e) => e.toString()).toList();
@@ -84,7 +84,7 @@ class RecipeModel {
     return [];
   }
 
-  /// Cria o modelo a partir do documento do Firestore
+  //aqui cria o modelo a partir do documento do Firestore, lidando com diferentes formatos de dados
   factory RecipeModel.fromFirestore(Map<String, dynamic> doc) {
     return RecipeModel(
       id: doc['idMeal']?.toString() ?? '',
@@ -96,7 +96,7 @@ class RecipeModel {
     );
   }
 
-  /// Serializa a receita para armazenamento no Firestore
+  //aqui converte o modelo em um mapa para armazenar no Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'idMeal': id,

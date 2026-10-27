@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/recipe_model.dart'; // Importação do modelo oficial
+import '../models/recipe_model.dart'; 
 
-/// Serviço responsável por realizar as buscas na API TheMealDB
 class ApiService {
   static const String _baseUrl = 'https://www.themealdb.com/api/json/v1/1';
 
-  /// Busca receitas pelo termo informado e retorna uma lista de RecipeModel
+  //aqui busca receitas na API TheMealDB com base em uma query de pesquisa
   static Future<List<RecipeModel>> searchRecipes(String query) async {
     final String cleanQuery = query.trim();
     if (cleanQuery.isEmpty) return [];

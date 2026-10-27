@@ -1,10 +1,10 @@
-# 👨‍🍳 Chef's Shelf (GourmetGo)
+# Chef's Shelf
 
 Aplicativo mobile desenvolvido em **Flutter** integrado ao **Firebase** (Authentication e Cloud Firestore) e à API **TheMealDB**, permitindo que os usuários descubram receitas culinárias online e as salvem em seu caderno de receitas pessoal na nuvem.
 
 ---
 
-## 📋 Sumário
+## Sumário
 1. [Visão Geral e Missão](#-visão-geral-e-missão)
 2. [Recursos e Funcionalidades](#-recursos-e-funcionalidades)
 3. [Modelagem de Dados no Firestore (Arrays e Maps)](#-modelagem-de-dados-no-firestore-arrays-e-maps)
@@ -17,7 +17,7 @@ Aplicativo mobile desenvolvido em **Flutter** integrado ao **Firebase** (Authent
 
 ---
 
-## 🎯 Visão Geral e Missão
+## Visão Geral e Missão
 
 - **Cliente**: Startup **GourmetGo**
 - **Missão**: Construir o núcleo de uma aplicação móvel moderna onde usuários exploram receitas completas da web e organizam seu próprio caderno culinário na nuvem.
@@ -25,18 +25,18 @@ Aplicativo mobile desenvolvido em **Flutter** integrado ao **Firebase** (Authent
 
 ---
 
-## ✨ Recursos e Funcionalidades
+##  Recursos e Funcionalidades
 
-- 🔐 **Autenticação Segura**: Cadastro e Login por e-mail e senha com feedback de validação em português.
-- 🔍 **Busca de Receitas em Tempo Real**: Consulta a receitas internacionais via TheMealDB API por nome ou ingrediente.
-- 📖 **Visualização Detalhada**: Imagem em alta definição, categoria, lista organizada de ingredientes com dosagens e passos numerados de preparo.
-- 💾 **Salvar no Caderno Pessoal**: Cópia instantânea dos dados da API para o banco Firestore do usuário com tipos complexos.
-- 📚 **Meu Caderno (Sincronização Reativa)**: Listagem dinâmica em tempo real (`StreamBuilder`) das receitas armazenadas.
-- 🗑️ **Remoção de Receitas**: Exclusão ágil no Firestore direto pelo card ou na tela de detalhes.
+-  **Autenticação Segura**: Cadastro e Login por e-mail e senha com feedback de validação em português.
+-  **Busca de Receitas em Tempo Real**: Consulta a receitas internacionais via TheMealDB API por nome ou ingrediente.
+-  **Visualização Detalhada**: Imagem em alta definição, categoria, lista organizada de ingredientes com dosagens e passos numerados de preparo.
+-  **Salvar no Caderno Pessoal**: Cópia instantânea dos dados da API para o banco Firestore do usuário com tipos complexos.
+-  **Meu Caderno (Sincronização Reativa)**: Listagem dinâmica em tempo real (`StreamBuilder`) das receitas armazenadas.
+-  **Remoção de Receitas**: Exclusão ágil no Firestore direto pelo card ou na tela de detalhes.
 
 ---
 
-## 🗄️ Modelagem de Dados no Firestore (Arrays e Maps)
+##  Modelagem de Dados no Firestore (Arrays e Maps)
 
 O projeto cumpre com rigor os critérios de modelagem de dados complexos no NoSQL Cloud Firestore.
 
@@ -87,7 +87,7 @@ Os ingredientes e instruções são armazenados utilizando **arrays** e **maps**
 
 ---
 
-## 🔄 Operações CRUD
+##  Operações CRUD
 
 As operações de banco de dados são centralizadas na classe `FirestoreService`:
 
@@ -100,7 +100,7 @@ As operações de banco de dados são centralizadas na classe `FirestoreService`
 
 ---
 
-## 🔒 Autenticação e Regras de Segurança
+##  Autenticação e Regras de Segurança
 
 Para garantir a privacidade e segurança exigidas no briefing, as regras do Cloud Firestore asseguram que nenhum usuário consiga visualizar, gravar ou deletar as receitas de outro usuário.
 
@@ -126,7 +126,7 @@ service cloud.firestore {
 
 ---
 
-## 🌐 Integração com TheMealDB API
+##  Integração com TheMealDB API
 
 A comunicação HTTP com a API TheMealDB é gerenciada pelo `ApiService`:
 - **Endpoint**: `https://www.themealdb.com/api/json/v1/1/search.php?s={query}`
@@ -134,7 +134,7 @@ A comunicação HTTP com a API TheMealDB é gerenciada pelo `ApiService`:
 
 ---
 
-## 🏛️ Arquitetura e Princípios de Código Limpo (SOLID)
+##  Arquitetura e Princípios de Código Limpo (SOLID)
 
 O código foi estruturado seguindo boas práticas de engenharia de software:
 
@@ -149,7 +149,7 @@ O código foi estruturado seguindo boas práticas de engenharia de software:
 
 ---
 
-## 📱 Como Executar no BlueStacks / Emulador Android
+##  Como Executar no BlueStacks / Emulador Android
 
 ### 1. Conectar o BlueStacks via ADB
 Certifique-se de que o BlueStacks está aberto com a opção "Depuração Android (ADB)" ativada nas configurações do BlueStacks (Configurações > Avançado > Ativar Depuração Android).
@@ -166,7 +166,7 @@ flutter devices
 Você verá o dispositivo `127.0.0.1:5555` listado como conectado.
 
 ### 3. Navegar até a Pasta do Projeto Flutter (Crucial!)
-> ⚠️ **Atenção**: O comando `flutter run` deve ser executado **obrigatoriamente dentro da pasta `chefs_shelf`** (onde está o arquivo `pubspec.yaml`). Se executado na pasta raiz superior, ocorrerá o erro `Error: No pubspec.yaml file found`.
+>  **Atenção**: O comando `flutter run` deve ser executado **obrigatoriamente dentro da pasta `chefs_shelf`** (onde está o arquivo `pubspec.yaml`). Se executado na pasta raiz superior, ocorrerá o erro `Error: No pubspec.yaml file found`.
 
 ```bash
 cd chefs_shelf
@@ -181,9 +181,9 @@ flutter run -d 127.0.0.1:5555
 
 ---
 
-## 🛠️ Solução de Problemas Comuns
+##  Solução de Problemas Comuns
 
-### ❌ Erro: `Error: No pubspec.yaml file found`
+###  Erro: `Error: No pubspec.yaml file found`
 - **Causa**: O comando foi executado fora da pasta do projeto Flutter.
 - **Solução**:
   ```bash
@@ -191,10 +191,10 @@ flutter run -d 127.0.0.1:5555
   flutter run
   ```
 
-### ❌ Erro: `Your app is using an unsupported Gradle project`
+###  Erro: `Your app is using an unsupported Gradle project`
 - **Causa**: O arquivo `android/app/build.gradle.kts` estava incorreto ou sem a declaração dos plugins e do namespace.
 - **Solução Realizada**: O arquivo foi devidamente configurado com os plugins do Android, Kotlin, Flutter e Google Services, com `minSdk = flutter.minSdkVersion` e suporte a rede.
 
-### ❌ Erro: Falha de conexão com a API ou Firebase
+###  Erro: Falha de conexão com a API ou Firebase
 - **Causa**: Falta da permissão de Internet no Android.
 - **Solução Realizada**: As permissões `android.permission.INTERNET` e `android.permission.ACCESS_NETWORK_STATE` foram adicionadas ao `AndroidManifest.xml`.
